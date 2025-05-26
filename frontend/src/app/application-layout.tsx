@@ -40,6 +40,10 @@ import {
   SparklesIcon,
   Square2StackIcon,
   TicketIcon,
+  ChartBarIcon,
+  CheckCircleIcon,
+  FolderIcon,
+  CpuChipIcon,
 } from '@heroicons/react/20/solid'
 import { usePathname } from 'next/navigation'
 
@@ -126,6 +130,22 @@ export function ApplicationLayout({
 
           <SidebarBody>
             <SidebarSection>
+              <SidebarItem href="/dashboard" current={pathname.startsWith('/dashboard')}>
+                <ChartBarIcon />
+                <SidebarLabel>Dashboard</SidebarLabel>
+              </SidebarItem>
+              <SidebarItem href="/tasks" current={pathname.startsWith('/tasks')}>
+                <CheckCircleIcon />
+                <SidebarLabel>Tasks</SidebarLabel>
+              </SidebarItem>
+              <SidebarItem href="/projects" current={pathname.startsWith('/projects')}>
+                <FolderIcon />
+                <SidebarLabel>Projects</SidebarLabel>
+              </SidebarItem>
+              <SidebarItem href="/ai-planner" current={pathname.startsWith('/ai-planner')}>
+                <CpuChipIcon />
+                <SidebarLabel>AI Planner</SidebarLabel>
+              </SidebarItem>
               <SidebarItem href="/" current={pathname === '/'}>
                 <HomeIcon />
                 <SidebarLabel>Home</SidebarLabel>
