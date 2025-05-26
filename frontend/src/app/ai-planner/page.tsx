@@ -3,7 +3,9 @@
 import { Button } from '@/components/button'
 import { Heading } from '@/components/heading'
 import { Input } from '@/components/input'
+import { Select } from '@/components/select'
 import { Text } from '@/components/text'
+import { Textarea } from '@/components/textarea'
 import {
   PaperAirplaneIcon,
   SparklesIcon,
@@ -47,13 +49,23 @@ const sampleSuggestions = [
   "Plan a charity fundraising gala",
 ]
 
+// Mock projects data
+const availableProjects = [
+  { id: 1, name: 'Website Redesign' },
+  { id: 2, name: 'Mobile App Development' },
+  { id: 3, name: 'Security Updates' },
+  { id: 4, name: 'Performance Optimization' },
+]
+
 export default function AIPlannerPage() {
   const [messages, setMessages] = useState<Message[]>([initialMessage])
   const [inputValue, setInputValue] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [hasStartedChat, setHasStartedChat] = useState(false)
+  const [selectedProject, setSelectedProject] = useState('new')
+  const [newProjectName, setNewProjectName] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
+  const inputRef = useRef<HTMLTextAreaElement>(null)
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -63,12 +75,33 @@ export default function AIPlannerPage() {
     scrollToBottom()
   }, [messages])
 
+  // Auto-resize textarea
+  useEffect(() => {
+    const textarea = inputRef.current
+    if (textarea) {
+      const adjustHeight = () => {
+        textarea.style.height = 'auto'
+        const scrollHeight = textarea.scrollHeight
+        const maxHeight = 200 // max-h-[200px]
+        textarea.style.height = `${Math.min(scrollHeight, maxHeight)}px`
+      }
+      
+      adjustHeight()
+      textarea.addEventListener('input', adjustHeight)
+      
+      return () => {
+        textarea.removeEventListener('input', adjustHeight)
+      }
+    }
+  }, [inputValue])
+
   const simulateAIResponse = async (userMessage: string): Promise<Message> => {
     // Simulate AI processing delay
     await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000))
 
     let response = ""
     let suggestions: TaskSuggestion[] = []
+    const projectName = getSelectedProjectName()
 
     // Simple keyword-based responses (in a real app, this would be an actual AI API)
     if (userMessage.toLowerCase().includes('wedding')) {
@@ -80,7 +113,7 @@ export default function AIPlannerPage() {
           description: 'Research and book the reception venue, including catering services',
           priority: 'High',
           estimatedDuration: '2-3 weeks',
-          project: 'Wedding Planning'
+          project: projectName
         },
         {
           id: '2',
@@ -88,7 +121,7 @@ export default function AIPlannerPage() {
           description: 'Design, print, and send wedding invitations to guests',
           priority: 'High',
           estimatedDuration: '1 week',
-          project: 'Wedding Planning'
+          project: projectName
         },
         {
           id: '3',
@@ -96,7 +129,7 @@ export default function AIPlannerPage() {
           description: 'Select and order floral arrangements and venue decorations',
           priority: 'Medium',
           estimatedDuration: '1 week',
-          project: 'Wedding Planning'
+          project: projectName
         },
         {
           id: '4',
@@ -104,7 +137,7 @@ export default function AIPlannerPage() {
           description: 'Book professional photography and videography services',
           priority: 'High',
           estimatedDuration: '1-2 weeks',
-          project: 'Wedding Planning'
+          project: projectName
         }
       ]
     } else if (userMessage.toLowerCase().includes('corporate') || userMessage.toLowerCase().includes('team building')) {
@@ -116,7 +149,7 @@ export default function AIPlannerPage() {
           description: 'Establish clear goals and outcomes for the team building event',
           priority: 'High',
           estimatedDuration: '2-3 days',
-          project: 'Team Building Event'
+          project: projectName
         },
         {
           id: '6',
@@ -124,7 +157,7 @@ export default function AIPlannerPage() {
           description: 'Reserve location and plan engaging team building activities',
           priority: 'High',
           estimatedDuration: '1 week',
-          project: 'Team Building Event'
+          project: projectName
         },
         {
           id: '7',
@@ -132,7 +165,7 @@ export default function AIPlannerPage() {
           description: 'Order food and beverages for all participants',
           priority: 'Medium',
           estimatedDuration: '3-5 days',
-          project: 'Team Building Event'
+          project: projectName
         },
         {
           id: '8',
@@ -140,7 +173,7 @@ export default function AIPlannerPage() {
           description: 'Create and send calendar invitations to all team members',
           priority: 'Medium',
           estimatedDuration: '1 day',
-          project: 'Team Building Event'
+          project: projectName
         }
       ]
     } else if (userMessage.toLowerCase().includes('product launch')) {
@@ -152,7 +185,7 @@ export default function AIPlannerPage() {
           description: 'Create a compelling theme that aligns with your product brand',
           priority: 'High',
           estimatedDuration: '1 week',
-          project: 'Product Launch'
+          project: projectName
         },
         {
           id: '10',
@@ -160,7 +193,7 @@ export default function AIPlannerPage() {
           description: 'Compile VIP list and design branded invitations',
           priority: 'High',
           estimatedDuration: '1 week',
-          project: 'Product Launch'
+          project: projectName
         },
         {
           id: '11',
@@ -168,7 +201,7 @@ export default function AIPlannerPage() {
           description: 'Arrange press coverage and social media promotion',
           priority: 'High',
           estimatedDuration: '2 weeks',
-          project: 'Product Launch'
+          project: projectName
         },
         {
           id: '12',
@@ -176,7 +209,7 @@ export default function AIPlannerPage() {
           description: 'Prepare interactive demos and product showcases',
           priority: 'Medium',
           estimatedDuration: '1 week',
-          project: 'Product Launch'
+          project: projectName
         }
       ]
     } else {
@@ -230,14 +263,24 @@ export default function AIPlannerPage() {
     inputRef.current?.focus()
   }
 
+  const getSelectedProjectName = () => {
+    if (selectedProject === 'new') {
+      return newProjectName || 'New Project'
+    }
+    const project = availableProjects.find(p => p.id.toString() === selectedProject)
+    return project?.name || 'Unknown Project'
+  }
+
   const handleCreateTask = (task: TaskSuggestion) => {
+    const projectName = getSelectedProjectName()
     // In a real app, this would create the task in your task management system
-    alert(`Task "${task.title}" would be created in project "${task.project}"`)
+    alert(`Task "${task.title}" would be created in project "${projectName}"`)
   }
 
   const handleCreateAllTasks = (tasks: TaskSuggestion[]) => {
+    const projectName = getSelectedProjectName()
     // In a real app, this would create all tasks
-    alert(`${tasks.length} tasks would be created in the project management system`)
+    alert(`${tasks.length} tasks would be created in project "${projectName}"`)
   }
 
   return (
@@ -272,18 +315,56 @@ export default function AIPlannerPage() {
               </div>
 
               <form onSubmit={handleSubmit} className="mb-8">
-                <div className="flex gap-3">
-                  <Input
-                    ref={inputRef}
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                    placeholder="e.g., I'm planning a corporate team building event for 50 people..."
-                    className="flex-1 text-base"
-                    disabled={isLoading}
-                  />
-                  <Button type="submit" disabled={!inputValue.trim() || isLoading}>
-                    <PaperAirplaneIcon className="h-4 w-4" />
-                  </Button>
+                <div className="space-y-4">
+                  {/* Project Selector */}
+                  <div className="flex gap-3">
+                    <Select 
+                      value={selectedProject} 
+                      onChange={(e) => setSelectedProject(e.target.value)}
+                      className="w-48"
+                    >
+                      <option value="new">Create New Project</option>
+                      {availableProjects.map((project) => (
+                        <option key={project.id} value={project.id.toString()}>
+                          {project.name}
+                        </option>
+                      ))}
+                    </Select>
+                    {selectedProject === 'new' && (
+                      <Input
+                        value={newProjectName}
+                        onChange={(e) => setNewProjectName(e.target.value)}
+                        placeholder="New project name..."
+                        className="flex-1"
+                      />
+                    )}
+                  </div>
+                  
+                  {/* Chat Input */}
+                  <div className="relative rounded-lg border border-zinc-300 bg-white shadow-sm dark:border-zinc-600 dark:bg-zinc-800">
+                    <Textarea
+                      ref={inputRef}
+                      value={inputValue}
+                      onChange={(e) => setInputValue(e.target.value)}
+                      placeholder="e.g., I'm planning a corporate team building event for 50 people..."
+                      className="min-h-[60px] max-h-[200px] resize-none border-0 bg-transparent p-4 pr-12 text-base focus:ring-0"
+                      disabled={isLoading}
+                      rows={1}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault()
+                          handleSubmit(e)
+                        }
+                      }}
+                    />
+                    <Button 
+                      type="submit" 
+                      disabled={!inputValue.trim() || isLoading}
+                      className="absolute bottom-2 right-2 h-8 w-8 p-0"
+                    >
+                      <PaperAirplaneIcon className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </form>
 
@@ -418,18 +499,56 @@ export default function AIPlannerPage() {
 
             <div className="flex-shrink-0 border-t border-zinc-950/5 bg-white px-6 py-4 dark:border-white/5 dark:bg-zinc-900">
               <form onSubmit={handleSubmit} className="mx-auto max-w-3xl">
-                <div className="flex gap-3">
-                  <Input
-                    ref={inputRef}
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                    placeholder="Ask me anything about your event planning..."
-                    className="flex-1"
-                    disabled={isLoading}
-                  />
-                  <Button type="submit" disabled={!inputValue.trim() || isLoading}>
-                    <PaperAirplaneIcon className="h-4 w-4" />
-                  </Button>
+                <div className="space-y-3">
+                  {/* Project Selector */}
+                  <div className="flex gap-3">
+                    <Select 
+                      value={selectedProject} 
+                      onChange={(e) => setSelectedProject(e.target.value)}
+                      className="w-48"
+                    >
+                      <option value="new">Create New Project</option>
+                      {availableProjects.map((project) => (
+                        <option key={project.id} value={project.id.toString()}>
+                          {project.name}
+                        </option>
+                      ))}
+                    </Select>
+                    {selectedProject === 'new' && (
+                      <Input
+                        value={newProjectName}
+                        onChange={(e) => setNewProjectName(e.target.value)}
+                        placeholder="New project name..."
+                        className="flex-1"
+                      />
+                    )}
+                  </div>
+                  
+                  {/* Chat Input */}
+                  <div className="relative rounded-lg border border-zinc-300 bg-white shadow-sm dark:border-zinc-600 dark:bg-zinc-800">
+                    <Textarea
+                      ref={inputRef}
+                      value={inputValue}
+                      onChange={(e) => setInputValue(e.target.value)}
+                      placeholder="Ask me anything about your event planning..."
+                      className="min-h-[60px] max-h-[200px] resize-none border-0 bg-transparent p-4 pr-12 text-base focus:ring-0"
+                      disabled={isLoading}
+                      rows={1}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault()
+                          handleSubmit(e)
+                        }
+                      }}
+                    />
+                    <Button 
+                      type="submit" 
+                      disabled={!inputValue.trim() || isLoading}
+                      className="absolute bottom-2 right-2 h-8 w-8 p-0"
+                    >
+                      <PaperAirplaneIcon className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </form>
             </div>
