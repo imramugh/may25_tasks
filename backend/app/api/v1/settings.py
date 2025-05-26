@@ -12,7 +12,7 @@ from app.config import settings as app_settings
 router = APIRouter()
 
 # Initialize encryption
-fernet = Fernet(app_settings.ENCRYPTION_KEY.encode()[:32].ljust(32, b'0'))
+fernet = Fernet(app_settings.ENCRYPTION_KEY.encode())
 
 
 # Pydantic schemas

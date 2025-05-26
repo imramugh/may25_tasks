@@ -10,8 +10,8 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent))
 
 from datetime import datetime, timedelta, date
-from app.database import SessionLocal, engine
-from app.models import Base, User, Project, Task, Tag, ProjectMember, UserSettings
+from app.database import SessionLocal, engine, Base
+from app.models import User, Project, Task, Tag, ProjectMember, UserSettings
 from app.models.enums import ProjectStatus, TaskStatus, Priority
 from app.api.v1.auth import get_password_hash
 
