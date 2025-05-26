@@ -1,8 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
-from app.database import engine
-from app.models import Base
+from app.database import engine, Base
 from app.api.v1 import auth, users, projects, tasks, settings as settings_router, ai_chat
 
 # Create database tables
