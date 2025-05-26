@@ -1,5 +1,5 @@
 from typing import List, Optional
-from datetime import datetime
+from datetime import datetime, date
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
@@ -34,7 +34,7 @@ class ProjectResponse(BaseModel):
     description: Optional[str]
     status: ProjectStatus
     progress: int
-    due_date: Optional[str]
+    due_date: Optional[date]
     owner_id: int
     total_tasks: int
     completed_tasks: int
