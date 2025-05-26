@@ -1,4 +1,5 @@
 from typing import Optional
+from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr
@@ -30,8 +31,8 @@ class UserResponse(BaseModel):
     role: str
     department: Optional[str]
     avatar_url: Optional[str]
-    created_at: str
-    last_login: Optional[str]
+    created_at: datetime
+    last_login: Optional[datetime]
     
     class Config:
         from_attributes = True

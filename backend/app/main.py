@@ -26,13 +26,21 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include routers
+# Include routers with v1 prefix
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["authentication"])
 app.include_router(users.router, prefix="/api/v1/users", tags=["users"])
 app.include_router(projects.router, prefix="/api/v1/projects", tags=["projects"])
 app.include_router(tasks.router, prefix="/api/v1/tasks", tags=["tasks"])
 app.include_router(settings_router.router, prefix="/api/v1/settings", tags=["settings"])
 app.include_router(ai_chat.router, prefix="/api/v1/ai", tags=["ai"])
+
+# Include routers without v1 prefix for frontend compatibility
+app.include_router(auth.router, prefix="/api/auth", tags=["authentication-compat"])
+app.include_router(users.router, prefix="/api/users", tags=["users-compat"])
+app.include_router(projects.router, prefix="/api/projects", tags=["projects-compat"])
+app.include_router(tasks.router, prefix="/api/tasks", tags=["tasks-compat"])
+app.include_router(settings_router.router, prefix="/api/settings", tags=["settings-compat"])
+app.include_router(ai_chat.router, prefix="/api/ai", tags=["ai-compat"])
 
 
 @app.get("/")
