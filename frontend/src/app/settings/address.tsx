@@ -2,7 +2,7 @@
 
 import { Input } from '@/components/input'
 import { Listbox, ListboxLabel, ListboxOption } from '@/components/listbox'
-import { getCountries } from '@/data'
+import { getCountries } from '@/data/countries'
 import { useState } from 'react'
 
 export function Address() {

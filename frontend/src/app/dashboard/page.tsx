@@ -1,8 +1,13 @@
+'use client'
+
 import { Badge } from '@/components/badge'
 import { Button } from '@/components/button'
 import { Heading } from '@/components/heading'
+import { Link } from '@/components/link'
+import { SortableTableHeader } from '@/components/sortable-table-header'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/table'
 import { Text } from '@/components/text'
+import { useTableSort } from '@/hooks/useTableSort'
 import {
   CheckCircleIcon,
   ClockIcon,
@@ -130,8 +135,10 @@ function getStatusBadge(status: string) {
 }
 
 export default function DashboardPage() {
+  const { sortedData: sortedTasks, sortConfig, handleSort } = useTableSort(recentTasks)
+
   return (
-    <div className="max-w-7xl mx-auto">
+    <>
       <div className="flex items-center justify-between">
         <div>
           <Heading>Dashboard</Heading>
@@ -146,18 +153,12 @@ export default function DashboardPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         <StatCard
           title="Open Tasks"
           value={dashboardStats.openTasks}
           icon={ChartBarIcon}
           color="blue"
-        />
-        <StatCard
-          title="Completed Tasks"
-          value={dashboardStats.closedTasks}
-          icon={CheckCircleIcon}
-          color="green"
         />
         <StatCard
           title="Active Projects"
@@ -184,18 +185,27 @@ export default function DashboardPage() {
         
         <div className="mt-6">
           <Table>
-            <TableHeader>
+            <TableHead>
               <TableRow>
-                <TableHead>Description</TableHead>
-                <TableHead>Priority</TableHead>
-                <TableHead>Due Date</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Project</TableHead>
-                <TableHead>Assignee</TableHead>
+                <SortableTableHeader sortKey="description" sortConfig={sortConfig} onSort={handleSort}>
+                  Description
+                </SortableTableHeader>
+                <SortableTableHeader sortKey="priority" sortConfig={sortConfig} onSort={handleSort}>
+                  Priority
+                </SortableTableHeader>
+                <SortableTableHeader sortKey="dueDate" sortConfig={sortConfig} onSort={handleSort}>
+                  Due Date
+                </SortableTableHeader>
+                <SortableTableHeader sortKey="status" sortConfig={sortConfig} onSort={handleSort}>
+                  Status
+                </SortableTableHeader>
+                <SortableTableHeader sortKey="project" sortConfig={sortConfig} onSort={handleSort}>
+                  Project
+                </SortableTableHeader>
               </TableRow>
-            </TableHeader>
+            </TableHead>
             <TableBody>
-              {recentTasks.map((task) => (
+              {sortedTasks.map((task) => (
                 <TableRow key={task.id}>
                   <TableCell className="font-medium">
                     <div className="flex items-center gap-3">
@@ -208,7 +218,9 @@ export default function DashboardPage() {
                           <ClockIcon className="h-5 w-5 text-zinc-400" />
                         )}
                       </div>
-                      <span>{task.description}</span>
+                      <Link href={`/tasks/${task.id}`} className="hover:text-blue-600 dark:hover:text-blue-400">
+                        {task.description}
+                      </Link>
                     </div>
                   </TableCell>
                   <TableCell>{getPriorityBadge(task.priority)}</TableCell>
@@ -223,17 +235,12 @@ export default function DashboardPage() {
                       {task.project}
                     </span>
                   </TableCell>
-                  <TableCell>
-                    <span className="text-sm text-zinc-600 dark:text-zinc-300">
-                      {task.assignee}
-                    </span>
-                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </div>
       </div>
-    </div>
+    </>
   )
 } 
